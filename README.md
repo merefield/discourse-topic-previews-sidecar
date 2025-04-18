@@ -15,7 +15,3 @@ This sidecar also includes some experimental features:
 You must have the Theme Component installed for it to work/be useful
 
 [See further here](https://meta.discourse.org/t/topic-list-previews-theme-component/209973?u=merefield).
-
-Bug list is now [managed here](https://thepavilion.io/tags/c/open-source/bug-reports/topic-list-previews)
-
-Feature requests are now [managed here](https://thepavilion.io/tags/c/open-source/feature-requests/topic-list-previews)
