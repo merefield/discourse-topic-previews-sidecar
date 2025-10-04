@@ -18,7 +18,7 @@ require_relative "lib/topic_previews/engine"
 after_initialize do
   reloadable_patch do
     Upload.prepend(TopicPreviews::UploadExtension)
-    Topic.prepend(TopicPreviews::TopicExtension)
+    Topic.include(TopicPreviews::TopicExtension)
     TopicViewSerializer.include(TopicPreviews::TopicViewSerializerExtension)
     ListHelper.prepend(TopicPreviews::ListHelperExtension)
     TopicList.prepend(TopicPreviews::TopicListExtension)
@@ -40,10 +40,14 @@ after_initialize do
     end
   end
 
+  register_topic_preloader_associations(:last_post)
+  register_topic_preloader_associations(:image_upload)
+
   User.register_custom_field_type(
     "tlp_user_prefs_prefer_low_res_thumbnails",
     :boolean
   )
+  # register_topic_preloader_associations(:last_post_excerpt)
   Topic.register_custom_field_type("user_chosen_thumbnail_url", :string)
   Topic.register_custom_field_type("dominant_colour", :json)
   Topic.register_custom_field_type("force_latest_post_nav", :boolean)
