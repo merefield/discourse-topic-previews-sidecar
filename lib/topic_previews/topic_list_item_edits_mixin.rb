@@ -7,27 +7,8 @@ module TopicPreviews
     end
 
     def excerpt
-      if object.previewed_post
-        doc = Nokogiri::HTML5.fragment(object.previewed_post.cooked)
-        doc.search(".//img").remove
-        if !SiteSetting.topic_list_excerpt_remove_links
-          PrettyText.excerpt(
-            doc.to_html,
-            SiteSetting.topic_list_excerpt_length,
-            keep_emoji_images: true
-          )
-        else
-          ::TopicPreviews::TopicListSerializerLib.remove_links(
-            PrettyText.excerpt(
-              doc.to_html,
-              SiteSetting.topic_list_excerpt_length,
-              keep_emoji_images: true
-            )
-          )
-        end
-      else
-        object.excerpt
-      end
+      post = object.previewed_post || object.first_post
+      object.excerpt_for(post) || object.excerpt
     end
 
     def include_topic_post_id?
@@ -135,7 +116,7 @@ module TopicPreviews
     end
 
     def last_post_excerpt
-      object.last_post_excerpt
+      object.last_post_excerpt_emoji
     end
 
     def last_post_id

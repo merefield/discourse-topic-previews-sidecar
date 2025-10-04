@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # name: discourse-topic-previews-sidecar
 # about: Sidecar Plugin to support Topic List Preview Theme Component
-# version: 6.1.0
+# version: 6.2.0
 # authors: Robert Barrow, Angus McLeod
 # url: https://github.com/paviliondev/discourse-topic-previews
 
@@ -40,6 +40,7 @@ after_initialize do
     end
   end
 
+  register_topic_preloader_associations(:first_post)
   register_topic_preloader_associations(:last_post)
   register_topic_preloader_associations(:image_upload)
 
