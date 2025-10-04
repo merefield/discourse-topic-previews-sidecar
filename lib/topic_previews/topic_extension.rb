@@ -7,8 +7,8 @@ module TopicPreviews
     included do
       has_one :last_post, -> { order(post_number: :desc) }, class_name: "Post"
       has_one :first_post,
-        -> { where(deleted_at: nil, post_number: 1) },
-        class_name: "Post"
+              -> { where(deleted_at: nil, post_number: 1) },
+              class_name: "Post"
     end
 
     attr_accessor :previewed_post
@@ -58,7 +58,7 @@ module TopicPreviews
 
     def excerpt_for(post)
       return nil unless post
-      build_cached_excerpt("tlp:post", post)  # same helper you wrote for first/last
+      build_cached_excerpt("tlp:post", post) # same helper you wrote for first/last
     end
 
     def last_post_excerpt_emoji
@@ -85,35 +85,40 @@ module TopicPreviews
         ("nolinks" if SiteSetting.topic_list_excerpt_remove_links)
       ].compact.join(":")
 
-      Discourse.cache.fetch(key, expires_in: 1.day) do
-        frag = Nokogiri::HTML5.fragment(post.cooked)
+      Discourse
+        .cache
+        .fetch(key, expires_in: 1.day) do
+          frag = Nokogiri::HTML5.fragment(post.cooked)
 
-        # --- Remove all non-emoji images ---
-        frag.css("img:not(.emoji)").remove
+          # --- Remove all non-emoji images ---
+          frag.css("img:not(.emoji)").remove
 
-        # --- Build the excerpt, still HTML ---
-        html_excerpt = PrettyText.excerpt(
-          frag.to_html,
-          SiteSetting.topic_list_excerpt_length,
-          keep_emoji_images: true
-        )
+          # --- Build the excerpt, still HTML ---
+          html_excerpt =
+            PrettyText.excerpt(
+              frag.to_html,
+              SiteSetting.topic_list_excerpt_length,
+              keep_emoji_images: true
+            )
 
-        if SiteSetting.topic_list_excerpt_remove_links
-          doc = Nokogiri::HTML5.fragment(html_excerpt)
+          if SiteSetting.topic_list_excerpt_remove_links
+            doc = Nokogiri::HTML5.fragment(html_excerpt)
 
-          # unwrap <a> tags (preserve inner HTML, remove the tag itself)
-          doc.css("a").each do |a|
-            a.replace(a.children) # keep link text / emojis
+            # unwrap <a> tags (preserve inner HTML, remove the tag itself)
+            doc
+              .css("a")
+              .each do |a|
+                a.replace(a.children) # keep link text / emojis
+              end
+
+            # Defensive: remove empty <a> remnants or attributes if any
+            doc.css("a").remove
+
+            html_excerpt = doc.to_html
           end
 
-          # Defensive: remove empty <a> remnants or attributes if any
-          doc.css("a").remove
-
-          html_excerpt = doc.to_html
+          html_excerpt
         end
-
-        html_excerpt
-      end
     end
   end
 end
