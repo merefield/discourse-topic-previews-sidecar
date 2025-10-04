@@ -34,31 +34,44 @@ module TopicPreviews
         end
       end
 
-      Post.where("id IN (?)", accepted_answer_post_ids).each do |post|
-        posts_map[post.topic_id] = post
-        previewed_post_ids << post.id
-      end
+      Post
+        .where("id IN (?)", accepted_answer_post_ids)
+        .each do |post|
+          posts_map[post.topic_id] = post
+          previewed_post_ids << post.id
+        end
 
-      Post.where("post_number <> 1 AND sort_order = 1 AND topic_id in (?)", qa_topic_ids).each do |post|
-        posts_map[post.topic_id] = post
-        previewed_post_ids << post.id
-      end
+      Post
+        .where(
+          "post_number <> 1 AND sort_order = 1 AND topic_id in (?)",
+          qa_topic_ids
+        )
+        .each do |post|
+          posts_map[post.topic_id] = post
+          previewed_post_ids << post.id
+        end
 
-      Post.where("post_number = 1 AND topic_id IN (?)", normal_topic_ids).each do |post|
-        posts_map[post.topic_id] = post
-        previewed_post_ids << post.id
-      end
+      Post
+        .where("post_number = 1 AND topic_id IN (?)", normal_topic_ids)
+        .each do |post|
+          posts_map[post.topic_id] = post
+          previewed_post_ids << post.id
+        end
 
       if user
-        PostAction.where("post_id IN (?) AND user_id = ?", previewed_post_ids, user.id).each do |post_action|
-          (post_actions_map[post_action.post_id] ||= []) << post_action
-        end
+        PostAction
+          .where("post_id IN (?) AND user_id = ?", previewed_post_ids, user.id)
+          .each do |post_action|
+            (post_actions_map[post_action.post_id] ||= []) << post_action
+          end
       end
 
       topics.each do |topic|
         topic.previewed_post = posts_map[topic.id]
-        topic.previewed_post_actions = post_actions_map[topic.previewed_post.id] if topic.previewed_post
-        topic.previewed_post_bookmark = Bookmark.find_by(bookmarkable_id: topic.first_post.id)
+        topic.previewed_post_actions =
+          post_actions_map[topic.previewed_post.id] if topic.previewed_post
+        topic.previewed_post_bookmark =
+          Bookmark.find_by(bookmarkable_id: topic.first_post.id)
       end
 
       topics

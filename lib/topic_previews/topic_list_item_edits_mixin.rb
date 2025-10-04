@@ -85,7 +85,7 @@ module TopicPreviews
     end
 
     def include_topic_post_like_count?
-      object.previewed_post&.id && topic_post_like_count > 0 &&
+      object.previewed_post&.id && topic_post_like_count.to_i > 0 &&
         SiteSetting.topic_list_previews_enabled
     end
 
@@ -135,32 +135,11 @@ module TopicPreviews
     end
 
     def last_post_excerpt
-      cache_key = "tlp_tl_last_post_excerpt_#{object.id}"
-      Discourse
-        .cache
-        .fetch(cache_key, expires_in: 10.minutes) do
-          post =
-            Post.find_by(
-              topic_id: object.id,
-              post_number: object.highest_post_number
-            ).cooked
-          doc = Nokogiri::HTML.fragment(post)
-          doc.search(".//img").remove
-          node = doc.at("a")
-          node.replace(node.text) if !node.nil?
-          PrettyText.excerpt(
-            doc.to_html,
-            SiteSetting.topic_list_excerpt_length,
-            keep_emoji_images: true
-          )
-        end
+      object.last_post_excerpt
     end
 
     def last_post_id
-      Post.find_by(
-        topic_id: object.id,
-        post_number: object.highest_post_number
-      ).id
+      object.last_post&.id
     end
   end
 end
