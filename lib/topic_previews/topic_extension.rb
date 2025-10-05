@@ -80,7 +80,7 @@ module TopicPreviews
       key = [
         prefix,
         post.id,
-        "b#{post.baked_version}",
+        "v#{post.version}",
         "len#{SiteSetting.topic_list_excerpt_length}",
         ("nolinks" if SiteSetting.topic_list_excerpt_remove_links)
       ].compact.join(":")
