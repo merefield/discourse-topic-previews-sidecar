@@ -14,7 +14,9 @@ module TopicPreviews
           if local?
             Discourse.store.path_for(self)
           else
-            Discourse.store.download_safe(self)&.path
+            result = Discourse.store.download_safe(self)
+            # TODO(zogstrip): switch to new API once https://github.com/discourse/discourse/pull/37760 is merged
+            result.is_a?(String) ? result : result&.path
           end
 
         if local_path.nil?
