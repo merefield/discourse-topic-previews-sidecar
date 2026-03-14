@@ -132,6 +132,64 @@ RSpec.describe CookedPostProcessor do
     expect(OptimizedImage.exists?(unrelated_optimized_image.id)).to eq(true)
   end
 
+  it "does not delete thumbnails before regeneration when recreation is disabled" do
+    post = Fabricate(:post, user: user, raw: "placeholder")
+    post.update_column(:image_upload_id, manual_upload.id)
+    post.topic.update_column(:image_upload_id, manual_upload.id)
+    post.topic.custom_fields["user_chosen_thumbnail_url"] = manual_upload.url
+    post.topic.save_custom_fields(true)
+    SiteSetting.topic_list_enable_thumbnail_recreation_on_post_rebuild = false
+
+    stale_optimized_image =
+      OptimizedImage.create!(
+        upload: manual_upload,
+        sha1: "3" * 40,
+        extension: ".jpeg",
+        width: 800,
+        height: 450,
+        url: "/uploads/default/optimized/stale-manual-disabled.jpeg",
+        filesize: 123,
+        version: 2,
+      )
+    stale_topic_thumbnail =
+      TopicThumbnail.create!(
+        upload: manual_upload,
+        optimized_image: stale_optimized_image,
+        max_width: 800,
+        max_height: 800,
+      )
+
+    unrelated_optimized_image =
+      OptimizedImage.create!(
+        upload: image_upload,
+        sha1: "4" * 40,
+        extension: ".jpeg",
+        width: 400,
+        height: 225,
+        url: "/uploads/default/optimized/unrelated-disabled.jpeg",
+        filesize: 456,
+        version: 2,
+      )
+    unrelated_topic_thumbnail =
+      TopicThumbnail.create!(
+        upload: image_upload,
+        optimized_image: unrelated_optimized_image,
+        max_width: 400,
+        max_height: 400,
+      )
+
+    processor = processor_for(post, "<p><img src='#{image_upload.url}'></p>")
+
+    post.topic.expects(:generate_thumbnails!).with(extra_sizes: kind_of(Array))
+
+    processor.update_post_image
+
+    expect(TopicThumbnail.exists?(stale_topic_thumbnail.id)).to eq(true)
+    expect(OptimizedImage.exists?(stale_optimized_image.id)).to eq(true)
+    expect(TopicThumbnail.exists?(unrelated_topic_thumbnail.id)).to eq(true)
+    expect(OptimizedImage.exists?(unrelated_optimized_image.id)).to eq(true)
+  end
+
   it "includes enabled theme component thumbnail sizes when generating thumbnails" do
     post = Fabricate(:post, user: user, raw: "placeholder")
     helper = stub(topic_thumbnail_sizes: [[800, 800]])
