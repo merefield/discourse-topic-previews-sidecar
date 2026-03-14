@@ -3,6 +3,8 @@
 source "https://rubygems.org"
 
 group :development do
+  gem "base64"
+  gem "ostruct"
   gem "racc"
   gem "rubocop-discourse"
   gem "syntax_tree"
