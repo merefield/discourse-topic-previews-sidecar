@@ -6,8 +6,7 @@ module TopicPreviews
     def calculate_dominant_color!(local_path = nil)
       color = nil
 
-      color = "" if !FileHelper.is_supported_image?("image.#{extension}") ||
-        extension == "svg"
+      color = "" if !FileHelper.is_supported_image?("image.#{extension}") || extension == "svg"
 
       if color.nil?
         local_path ||=
@@ -40,7 +39,7 @@ module TopicPreviews
                 "-format",
                 "%c",
                 "histogram:info:",
-                timeout: DOMINANT_COLOR_COMMAND_TIMEOUT_SECONDS
+                timeout: DOMINANT_COLOR_COMMAND_TIMEOUT_SECONDS,
               )
 
             # Output format:
@@ -48,9 +47,7 @@ module TopicPreviews
 
             color = data[/#([0-9A-F]{6})/, 1]
 
-            if color.nil?
-              raise "Calculated dominant color but unable to parse output:\n#{data}"
-            end
+            raise "Calculated dominant color but unable to parse output:\n#{data}" if color.nil?
 
             color
           rescue Discourse::Utils::CommandError => e

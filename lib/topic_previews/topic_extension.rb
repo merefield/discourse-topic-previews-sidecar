@@ -6,9 +6,7 @@ module TopicPreviews
 
     included do
       has_one :last_post, -> { order(post_number: :desc) }, class_name: "Post"
-      has_one :first_post,
-              -> { where(deleted_at: nil, post_number: 1) },
-              class_name: "Post"
+      has_one :first_post, -> { where(deleted_at: nil, post_number: 1) }, class_name: "Post"
     end
 
     attr_accessor :previewed_post
@@ -27,8 +25,7 @@ module TopicPreviews
       return nil unless SiteSetting.create_thumbnails
       original = image_upload
       return nil unless original
-      if original.filesize &&
-           original.filesize >= SiteSetting.max_image_size_kb.kilobytes
+      if original.filesize && original.filesize >= SiteSetting.max_image_size_kb.kilobytes
         return nil
       end
       return nil unless original.width && original.height
@@ -40,18 +37,12 @@ module TopicPreviews
           .find_each do |tn|
             optimized_image_id = tn.optimized_image_id
             tn.destroy
-            if optimized_image_id.present?
-              OptimizedImage.find_by(id: optimized_image_id)&.destroy
-            end
+            OptimizedImage.find_by(id: optimized_image_id)&.destroy if optimized_image_id.present?
           end
       end
 
       (Topic.thumbnail_sizes + extra_sizes).each do |(w, h)|
-        TopicThumbnail.find_or_create_for!(
-          original,
-          max_width: w,
-          max_height: h
-        )
+        TopicThumbnail.find_or_create_for!(original, max_width: w, max_height: h)
       end
       nil
     end
@@ -82,7 +73,7 @@ module TopicPreviews
         post.id,
         "v#{post.version}",
         "len#{SiteSetting.topic_list_excerpt_length}",
-        ("nolinks" if SiteSetting.topic_list_excerpt_remove_links)
+        ("nolinks" if SiteSetting.topic_list_excerpt_remove_links),
       ].compact.join(":")
 
       Discourse
@@ -98,7 +89,7 @@ module TopicPreviews
             PrettyText.excerpt(
               frag.to_html,
               SiteSetting.topic_list_excerpt_length,
-              keep_emoji_images: true
+              keep_emoji_images: true,
             )
 
           if SiteSetting.topic_list_excerpt_remove_links

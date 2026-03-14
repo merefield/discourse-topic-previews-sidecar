@@ -26,11 +26,7 @@ module TopicPreviews
     def topic_post_user
       if object.previewed_post
         @topic_post_user ||=
-          BasicUserSerializer.new(
-            object.previewed_post.user,
-            scope: scope,
-            root: false
-          ).as_json
+          BasicUserSerializer.new(object.previewed_post.user, scope: scope, root: false).as_json
       else
         nil
       end
@@ -45,9 +41,7 @@ module TopicPreviews
     end
 
     def topic_like_action
-      topic_post_actions.select do |a|
-        a.post_action_type_id == PostActionType.types[:like]
-      end
+      topic_post_actions.select { |a| a.post_action_type_id == PostActionType.types[:like] }
     end
 
     def topic_post_bookmarked
@@ -76,14 +70,13 @@ module TopicPreviews
         object.previewed_post,
         object,
         PostActionType.types[:like],
-        taken_actions: topic_post_actions
+        taken_actions: topic_post_actions,
       )
     end
     alias include_topic_post_can_like? include_topic_post_id?
 
     def topic_post_is_current_users
-      scope.current_user &&
-        (object.previewed_post&.user_id == scope.current_user.id)
+      scope.current_user && (object.previewed_post&.user_id == scope.current_user.id)
     end
     alias include_topic_post_is_current_users? include_topic_post_id?
 
@@ -92,10 +85,7 @@ module TopicPreviews
       action = topic_like_action[0]
       !!(
         action && (action.user_id == scope.current_user.id) &&
-          (
-            action.created_at >
-              SiteSetting.post_undo_action_window_mins.minutes.ago
-          )
+          (action.created_at > SiteSetting.post_undo_action_window_mins.minutes.ago)
       )
     end
 

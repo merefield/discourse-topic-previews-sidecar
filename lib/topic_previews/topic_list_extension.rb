@@ -42,10 +42,7 @@ module TopicPreviews
         end
 
       Post
-        .where(
-          "post_number <> 1 AND sort_order = 1 AND topic_id in (?)",
-          qa_topic_ids
-        )
+        .where("post_number <> 1 AND sort_order = 1 AND topic_id in (?)", qa_topic_ids)
         .each do |post|
           posts_map[post.topic_id] = post
           previewed_post_ids << post.id
@@ -61,17 +58,14 @@ module TopicPreviews
       if user
         PostAction
           .where("post_id IN (?) AND user_id = ?", previewed_post_ids, user.id)
-          .each do |post_action|
-            (post_actions_map[post_action.post_id] ||= []) << post_action
-          end
+          .each { |post_action| (post_actions_map[post_action.post_id] ||= []) << post_action }
       end
 
       topics.each do |topic|
         topic.previewed_post = posts_map[topic.id]
         topic.previewed_post_actions =
           post_actions_map[topic.previewed_post.id] if topic.previewed_post
-        topic.previewed_post_bookmark =
-          Bookmark.find_by(bookmarkable_id: topic.first_post.id)
+        topic.previewed_post_bookmark = Bookmark.find_by(bookmarkable_id: topic.first_post.id)
       end
 
       topics
