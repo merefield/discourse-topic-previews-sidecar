@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 module ::TopicPreviews
   class ThumbnailSelectionController < ::ApplicationController
-    requires_plugin PLUGIN_NAME
+    requires_plugin "discourse-topic-previews-sidecar"
 
     def index
       params.require(:topic)
@@ -18,9 +18,7 @@ module ::TopicPreviews
         thumbnails = TopicPreviews::ThumbnailSelectionHelper.get_thumbnails_from_topic(topic)
       end
 
-      respond_to do |format|
-        format.json { render json: { thumbnailselection: thumbnails } }
-      end
+      respond_to { |format| format.json { render json: { thumbnailselection: thumbnails } } }
     end
   end
 end

@@ -10,9 +10,9 @@ module ::TopicPreviews::ThumbnailSelectionHelper
       # minus onebox site icons
       doc.css("img.site-icon") -
       # minus onebox avatars
-      doc.css("img.onebox-avatar") #-
-    # minus small onebox images (large images are .aspect-image-full-size)
-    # @doc.css(".onebox .aspect-image img")
+      doc.css("img.onebox-avatar") - doc.css("img.onebox-avatar-inline") -
+      # minus github onebox profile images
+      doc.css(".onebox.githubfolder img")
   end
 
   def self.get_thumbnails_from_topic(topic)
@@ -29,17 +29,9 @@ module ::TopicPreviews::ThumbnailSelectionHelper
 
       eligible_image_fragments = extract_images_for_post(doc)
 
-      @post.each_upload_url(
-        fragments: eligible_image_fragments
-      ) do |src, path, sha1|
-        upload = Upload.find_by(sha1: sha1)
-        if upload
-          thumbnails << {
-            image_url: upload.url,
-            post_id: post_id,
-            upload_id: upload.id
-          }
-        end
+      @post.each_upload_url(fragments: eligible_image_fragments) do |src, path, sha1|
+        upload = Upload.fetch_from(sha1:, url: src)
+        thumbnails << { image_url: upload.url, post_id: post_id, upload_id: upload.id } if upload
       end
     end
     thumbnails
