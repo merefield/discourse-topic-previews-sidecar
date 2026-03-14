@@ -48,24 +48,10 @@ module TopicPreviews
     end
 
     def regenerate_topic_thumbnails!
-      clear_existing_topic_thumbnails_if_needed
-      @post.topic.generate_thumbnails!(extra_sizes: get_extra_sizes)
-    end
-
-    def clear_existing_topic_thumbnails_if_needed
-      return false if !@post.is_first_post?
-      return false if !SiteSetting.topic_list_enable_thumbnail_recreation_on_post_rebuild
-      return false if @post.topic.image_upload_id.blank?
-
-      TopicThumbnail
-        .where(upload_id: @post.topic.image_upload_id)
-        .find_each do |topic_thumbnail|
-          optimized_image_id = topic_thumbnail.optimized_image_id
-          topic_thumbnail.destroy
-          OptimizedImage.find_by(id: optimized_image_id)&.destroy if optimized_image_id.present?
-        end
-
-      true
+      @post.topic.generate_thumbnails!(
+        extra_sizes: get_extra_sizes,
+        recreate_existing: SiteSetting.topic_list_enable_thumbnail_recreation_on_post_rebuild,
+      )
     end
 
     def get_extra_sizes
