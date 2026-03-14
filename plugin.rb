@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # name: discourse-topic-previews-sidecar
 # about: Sidecar Plugin to support Topic List Preview Theme Component
-# version: 6.3.1
+# version: 6.3.2
 # authors: Robert Barrow, Angus McLeod
 # url: https://github.com/paviliondev/discourse-topic-previews
 
@@ -19,6 +19,7 @@ after_initialize do
   reloadable_patch do
     Upload.prepend(TopicPreviews::UploadExtension)
     Topic.include(TopicPreviews::TopicExtension)
+    Topic.prepend(TopicPreviews::TopicGenerateThumbnailsExtension)
     TopicViewSerializer.include(TopicPreviews::TopicViewSerializerExtension)
     ListHelper.prepend(TopicPreviews::ListHelperExtension)
     TopicList.prepend(TopicPreviews::TopicListExtension)

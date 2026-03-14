@@ -20,7 +20,7 @@ module TopicPreviews
 
     def update_post_image
       if @post.is_first_post? && @post.topic.custom_fields["user_chosen_thumbnail_url"]
-        @post.topic.generate_thumbnails!(extra_sizes: get_extra_sizes)
+        regenerate_topic_thumbnails!
       else
         upload = nil
         eligible_image_fragments = extract_images_for_post
@@ -35,7 +35,7 @@ module TopicPreviews
           @post.update_column(:image_upload_id, upload.id) # post
           if @post.is_first_post? # topic
             @post.topic.update_column(:image_upload_id, upload.id)
-            @post.topic.generate_thumbnails!(extra_sizes: get_extra_sizes)
+            regenerate_topic_thumbnails!
           end
         else
           @post.update_column(:image_upload_id, nil) if @post.image_upload_id
@@ -45,6 +45,13 @@ module TopicPreviews
           nil
         end
       end
+    end
+
+    def regenerate_topic_thumbnails!
+      @post.topic.generate_thumbnails!(
+        extra_sizes: get_extra_sizes,
+        recreate_existing: SiteSetting.topic_list_enable_thumbnail_recreation_on_post_rebuild,
+      )
     end
 
     def get_extra_sizes

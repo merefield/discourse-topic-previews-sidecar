@@ -63,15 +63,33 @@ RSpec.describe CookedPostProcessor do
     post.topic.update_column(:image_upload_id, manual_upload.id)
     post.topic.custom_fields["user_chosen_thumbnail_url"] = manual_upload.url
     post.topic.save_custom_fields(true)
+    SiteSetting.topic_list_enable_thumbnail_recreation_on_post_rebuild = true
 
     processor = processor_for(post, "<p><img src='#{image_upload.url}'></p>")
 
-    post.topic.expects(:generate_thumbnails!).with(extra_sizes: kind_of(Array))
+    post
+      .topic
+      .expects(:generate_thumbnails!)
+      .with(extra_sizes: kind_of(Array), recreate_existing: true)
 
     processor.update_post_image
 
     expect(post.reload.image_upload_id).to eq(manual_upload.id)
     expect(post.topic.reload.image_upload_id).to eq(manual_upload.id)
+  end
+
+  it "passes through disabled thumbnail recreation for first-post regeneration" do
+    post = Fabricate(:post, user: user, raw: "placeholder")
+    SiteSetting.topic_list_enable_thumbnail_recreation_on_post_rebuild = false
+
+    processor = processor_for(post, "<p><img src='#{image_upload.url}'></p>")
+
+    post
+      .topic
+      .expects(:generate_thumbnails!)
+      .with(extra_sizes: kind_of(Array), recreate_existing: false)
+
+    processor.update_post_image
   end
 
   it "includes enabled theme component thumbnail sizes when generating thumbnails" do
