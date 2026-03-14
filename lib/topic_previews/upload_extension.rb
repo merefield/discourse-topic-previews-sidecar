@@ -10,7 +10,13 @@ module TopicPreviews
 
       if color.nil?
         local_path ||=
-          (local? ? Discourse.store.path_for(self) : Discourse.store.download_safe(self)&.path)
+          if local?
+            Discourse.store.path_for(self)
+          else
+            result = Discourse.store.download_safe(self)
+            # TODO(zogstrip): switch to new API once https://github.com/discourse/discourse/pull/37760 is merged
+            result.is_a?(String) ? result : result&.path
+          end
 
         if local_path.nil?
           # Download failed. Could be too large to download, or file could be missing in s3
