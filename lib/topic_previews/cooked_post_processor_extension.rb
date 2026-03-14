@@ -20,7 +20,7 @@ module TopicPreviews
 
     def update_post_image
       if @post.is_first_post? && @post.topic.custom_fields["user_chosen_thumbnail_url"]
-        @post.topic.generate_thumbnails!(extra_sizes: get_extra_sizes)
+        regenerate_topic_thumbnails!
       else
         upload = nil
         eligible_image_fragments = extract_images_for_post
@@ -35,7 +35,7 @@ module TopicPreviews
           @post.update_column(:image_upload_id, upload.id) # post
           if @post.is_first_post? # topic
             @post.topic.update_column(:image_upload_id, upload.id)
-            @post.topic.generate_thumbnails!(extra_sizes: get_extra_sizes)
+            regenerate_topic_thumbnails!
           end
         else
           @post.update_column(:image_upload_id, nil) if @post.image_upload_id
@@ -45,6 +45,27 @@ module TopicPreviews
           nil
         end
       end
+    end
+
+    def regenerate_topic_thumbnails!
+      clear_existing_topic_thumbnails_if_needed
+      @post.topic.generate_thumbnails!(extra_sizes: get_extra_sizes)
+    end
+
+    def clear_existing_topic_thumbnails_if_needed
+      return false if !@post.is_first_post?
+      return false if !SiteSetting.topic_list_enable_thumbnail_recreation_on_post_rebuild
+      return false if @post.topic.image_upload_id.blank?
+
+      TopicThumbnail
+        .where(upload_id: @post.topic.image_upload_id)
+        .find_each do |topic_thumbnail|
+          optimized_image_id = topic_thumbnail.optimized_image_id
+          topic_thumbnail.destroy
+          OptimizedImage.find_by(id: optimized_image_id)&.destroy if optimized_image_id.present?
+        end
+
+      true
     end
 
     def get_extra_sizes
