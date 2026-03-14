@@ -77,7 +77,7 @@ after_initialize do
   PostRevisor.track_topic_field("user_chosen_thumbnail_url".to_sym) do |tc, tf|
     tc.record_change(
       "user_chosen_thumbnail_url",
-      tc.topic.custom_fields["user_thumbnail_choice"],
+      tc.topic.custom_fields["user_chosen_thumbnail_url"],
       tf,
     )
     tc.topic.custom_fields["user_chosen_thumbnail_url"] = tf
