@@ -10,6 +10,7 @@ module ::TopicPreviews
 
       topic_id = params[:topic].to_i
       topic = Topic.find(topic_id)
+      guardian.ensure_can_see!(topic)
       user_id = topic.user_id
 
       thumbnails = []

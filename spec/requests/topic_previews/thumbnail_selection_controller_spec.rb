@@ -8,6 +8,7 @@ RSpec.describe TopicPreviews::ThumbnailSelectionController do
   fab!(:github_avatar_upload, :image_upload)
   fab!(:image_upload, :image_upload)
   fab!(:post) { Fabricate(:post, user: owner) }
+  fab!(:private_message_topic) { Fabricate(:private_message_topic, user: owner) }
 
   before do
     SiteSetting.topic_list_previews_enabled = true
@@ -51,5 +52,13 @@ RSpec.describe TopicPreviews::ThumbnailSelectionController do
 
     expect(response.status).to eq(200)
     expect(response.parsed_body["thumbnailselection"]).to eq([])
+  end
+
+  it "forbids users who cannot see the topic" do
+    sign_in(other_user)
+
+    get "/topic-previews/thumbnail-selection.json", params: { topic: private_message_topic.id }
+
+    expect(response.status).to eq(403)
   end
 end
