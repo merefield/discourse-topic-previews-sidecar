@@ -3,11 +3,7 @@ module TopicPreviews
   module TopicViewSerializerExtension
     extend ActiveSupport::Concern
 
-    included do
-      attributes :user_chosen_thumbnail_url,
-                 :force_latest_post_nav,
-                 :sidecar_installed
-    end
+    included { attributes :user_chosen_thumbnail_url, :force_latest_post_nav, :sidecar_installed }
 
     def user_chosen_thumbnail_url
       object.topic.custom_fields["user_chosen_thumbnail_url"]

@@ -61,11 +61,7 @@ module TopicPreviews
 
           # Batch bookmarks for the previewed posts (not first_post)
           Bookmark
-            .where(
-              user_id: user.id,
-              bookmarkable_type: "Post",
-              bookmarkable_id: previewed_post_ids
-            )
+            .where(user_id: user.id, bookmarkable_type: "Post", bookmarkable_id: previewed_post_ids)
             .pluck(:bookmarkable_id)
             .each { |pid| bookmarked_post_ids << pid }
         end
@@ -75,8 +71,7 @@ module TopicPreviews
           pv = posts_map[topic.id]
           topic.previewed_post = pv
           topic.previewed_post_actions = pv ? post_actions_map[pv.id] : nil
-          topic.previewed_post_bookmark =
-            pv ? bookmarked_post_ids.include?(pv.id) : false
+          topic.previewed_post_bookmark = pv ? bookmarked_post_ids.include?(pv.id) : false
         end
 
         topics
