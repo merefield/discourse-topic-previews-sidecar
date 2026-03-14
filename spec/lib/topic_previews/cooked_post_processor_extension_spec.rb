@@ -73,4 +73,16 @@ RSpec.describe CookedPostProcessor do
     expect(post.reload.image_upload_id).to eq(manual_upload.id)
     expect(post.topic.reload.image_upload_id).to eq(manual_upload.id)
   end
+
+  it "includes enabled theme component thumbnail sizes when generating thumbnails" do
+    post = Fabricate(:post, user: user, raw: "placeholder")
+    helper = stub(topic_thumbnail_sizes: [[800, 800]])
+
+    Theme.stubs(:enabled_theme_and_component_ids).returns([12, 34])
+    ThemeModifierHelper.expects(:new).with(theme_ids: [12, 34]).returns(helper)
+
+    expect(processor_for(post, "<p><img src='#{image_upload.url}'></p>").get_extra_sizes).to eq(
+      [[800, 800]],
+    )
+  end
 end

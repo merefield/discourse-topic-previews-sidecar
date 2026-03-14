@@ -48,7 +48,9 @@ module TopicPreviews
     end
 
     def get_extra_sizes
-      ThemeModifierHelper.new(theme_ids: Theme.user_selectable.pluck(:id)).topic_thumbnail_sizes
+      ThemeModifierHelper.new(
+        theme_ids: Theme.enabled_theme_and_component_ids,
+      ).topic_thumbnail_sizes
     end
   end
 end
