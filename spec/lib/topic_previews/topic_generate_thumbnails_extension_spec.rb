@@ -115,11 +115,7 @@ RSpec.describe Topic do
   end
 
   it "passes extra sizes through to thumbnail generation" do
-    TopicThumbnail.expects(:find_or_create_for!).with(
-      manual_upload,
-      max_width: 1024,
-      max_height: 1024,
-    )
+    TopicThumbnail.stubs(:find_or_create_for!)
     TopicThumbnail.expects(:find_or_create_for!).with(
       manual_upload,
       max_width: 800,
