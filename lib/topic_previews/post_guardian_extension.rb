@@ -6,7 +6,18 @@ module TopicPreviews
   module PostGuardianExtension
     # Passing existing loaded topic record avoids an N+1.
     def previewed_post_can_act?(post, topic, action_key, opts = {})
-      taken = opts[:taken_actions].try(:keys).to_a
+      raw_taken = opts[:taken_actions]
+      taken =
+        case raw_taken
+        when Hash
+          raw_taken.keys.to_a
+        when Array
+          raw_taken
+            .map { |pa| pa.respond_to?(:post_action_type_id) ? pa.post_action_type_id : pa }
+            .compact
+        else
+          []
+        end
       is_flag = PostActionType.is_flag?(action_key)
       already_taken_this_action = taken.any? && taken.include?(PostActionType.types[action_key])
       already_did_flagging = taken.any? && (taken & PostActionType.flag_types.values).any?
