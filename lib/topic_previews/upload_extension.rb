@@ -10,11 +10,7 @@ module TopicPreviews
 
       if color.nil?
         local_path ||=
-          if local?
-            Discourse.store.path_for(self)
-          else
-            Discourse.store.download_safe(self)&.path
-          end
+          (local? ? Discourse.store.path_for(self) : Discourse.store.download_safe(self)&.path)
 
         if local_path.nil?
           # Download failed. Could be too large to download, or file could be missing in s3
