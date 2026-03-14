@@ -50,4 +50,16 @@ RSpec.describe TopicPreviews::ThumbnailSelectionHelper do
 
     expect(thumbnails.pluck(:upload_id)).to eq([url_fallback_upload.id])
   end
+
+  it "does not re-query posts while extracting thumbnails" do
+    post = Fabricate(:post, user: user)
+
+    update_cooked(post, "<p><img src='#{image_upload.url}'></p>")
+
+    Post.expects(:find).never
+
+    thumbnails = described_class.get_thumbnails_from_topic(post.topic)
+
+    expect(thumbnails.pluck(:upload_id)).to eq([image_upload.id])
+  end
 end

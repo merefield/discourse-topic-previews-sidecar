@@ -18,18 +18,14 @@ module ::TopicPreviews::ThumbnailSelectionHelper
   def self.get_thumbnails_from_topic(topic)
     thumbnails = []
 
-    posts = topic.posts
-
-    posts.map do |post|
+    topic.posts.each do |post|
       post_id = post.id.to_i
 
-      @post = Post.find(post_id)
-
-      doc = Nokogiri::HTML5.fragment(@post.cooked)
+      doc = Nokogiri::HTML5.fragment(post.cooked)
 
       eligible_image_fragments = extract_images_for_post(doc)
 
-      @post.each_upload_url(fragments: eligible_image_fragments) do |src, path, sha1|
+      post.each_upload_url(fragments: eligible_image_fragments) do |src, path, sha1|
         upload = Upload.fetch_from(sha1:, url: src)
         thumbnails << { image_url: upload.url, post_id: post_id, upload_id: upload.id } if upload
       end
