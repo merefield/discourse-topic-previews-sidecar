@@ -1,4 +1,8 @@
-# discourse-topic-previews (sidecar plugin)
+# discourse-topic-previews-sidecar-legacy
+
+This is a legacy version of discourse-topic-previews-sidecar and is no longer supported publicly.
+
+GitHub sponsors can gain access to a more modern, supported version.
 
 This is a sidecar plugin to add features to the otherwise [standalone TC Topic List Previews](https://github.com/paviliondev/discourse-tc-topic-list-previews):
 
