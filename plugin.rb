@@ -16,6 +16,10 @@ end
 require_relative "lib/topic_previews/engine"
 
 after_initialize do
+  require_relative "app/services/problem_check/topic_list_previews_sidecar_unsupported"
+
+  register_problem_check ProblemCheck::TopicListPreviewsSidecarUnsupported
+
   reloadable_patch do
     Upload.prepend(TopicPreviews::UploadExtension)
     Topic.prepend(TopicPreviews::TopicExtension)

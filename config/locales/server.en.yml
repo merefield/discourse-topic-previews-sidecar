@@ -1,4 +1,7 @@
 en:
+  dashboard:
+    problem:
+      topic_list_previews_sidecar_unsupported: "This version of Topic List Previews Sidecar is unsupported, visit the <a href='https://meta.discourse.org/t/topic-list-previews-theme-component/209973'>Meta Topic</a> for details on how to access the supported version."
   site_settings:
     topic_list_previews_enabled: "Enable Topic List Previews side-car plugin"
     topic_list_show_like_on_current_users_posts: "Show an inactive like button in topic list items previewing a post created by the current user (non-default Discourse behavior)."
